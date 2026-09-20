@@ -23,9 +23,11 @@ jobs:
   review-pr:
     if: ${{ github.event_name == 'workflow_dispatch' || !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     env:
-      MODEL_PROVIDER: ${{ vars.MODEL_PROVIDER || 'openai' }}
-      MODEL_NAME: ${{ vars.MODEL_NAME || 'gpt-4o-mini' }}
+      MODEL_PROVIDER: ${{ vars.MODEL_PROVIDER || 'ollama' }}
+      MODEL_NAME: ${{ vars.MODEL_NAME || 'qwen2.5-coder:3b' }}
+      OLLAMA_BASE_URL: http://127.0.0.1:11434
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
       AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
@@ -35,6 +37,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha || github.sha }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -44,6 +48,10 @@ jobs:
       - name: Install agent workbench
         run: python -m pip install -e .
 
+      - name: Install Ollama and pull Qwen
+        if: ${{ env.MODEL_PROVIDER == 'ollama' }}
+        run: bash .github/scripts/setup-ollama.sh
+
       - name: Review pull request
         run: |
           python -m agent_workbench.github_pr_agent \
@@ -51,4 +59,3 @@ jobs:
             --pr-number "$PR_NUMBER" \
             --provider "$MODEL_PROVIDER" \
             --model "$MODEL_NAME"
-

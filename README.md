@@ -107,10 +107,22 @@ Configure repository secrets/variables before enabling the workflows:
 OPENAI_API_KEY              # required when MODEL_PROVIDER=openai
 AZURE_OPENAI_API_KEY        # required when MODEL_PROVIDER=azure-openai
 AZURE_OPENAI_ENDPOINT       # required when MODEL_PROVIDER=azure-openai
-MODEL_PROVIDER              # repository variable: openai or azure-openai
-MODEL_NAME                  # repository variable: model name or Azure deployment
+MODEL_PROVIDER              # repository variable: ollama, openai, or azure-openai
+MODEL_NAME                  # repository variable: Ollama model, OpenAI model, or Azure deployment
 AZURE_OPENAI_API_VERSION    # optional repository variable
 ```
+
+The workflows default to Ollama with `qwen2.5-coder:3b`, install Ollama on the GitHub-hosted runner, and pull the selected model before running an agent. No API secret is required for this default.
+
+Recommended Qwen choices for GitHub-hosted runners:
+
+| Model | Use |
+|---|---|
+| `qwen2.5-coder:1.5b` | Fastest and lowest runner resource use |
+| `qwen2.5-coder:3b` | Default balance of speed and analysis quality |
+| `qwen2.5-coder:7b` | Better output but slower and more resource intensive |
+
+Set `MODEL_PROVIDER=ollama` and change `MODEL_NAME` to select another locally hosted Qwen model. Pull time is incurred on each new GitHub-hosted runner.
 
 The issue workflow intentionally creates a **draft PR with a fix plan**, not an unreviewed code patch. Convert the plan into code after review.
 
