@@ -21,6 +21,7 @@ TEXT_EXTENSIONS = {
     ".js",
     ".json",
     ".jsx",
+    ".log",
     ".md",
     ".php",
     ".py",
@@ -267,10 +268,17 @@ def should_include(path: Path, root: Path) -> bool:
 
 def read_issue(args: argparse.Namespace) -> str:
     if args.issue_file:
-        return Path(args.issue_file).read_text(encoding="utf-8").strip()
-    if args.issue:
-        return args.issue.strip()
-    raise ValueError("Provide --issue or --issue-file.")
+        issue_text = Path(args.issue_file).read_text(encoding="utf-8").strip()
+    elif args.issue:
+        issue_text = args.issue.strip()
+    else:
+        raise ValueError("Provide --issue or --issue-file.")
+
+    if args.log_file:
+        log_text = Path(args.log_file).read_text(encoding="utf-8", errors="replace").strip()
+        return f"{issue_text}\n\nFailure logs:\n```text\n{log_text}\n```"
+
+    return issue_text
 
 
 def print_result(result: dict[str, Any], as_json: bool) -> None:
@@ -301,16 +309,19 @@ def main() -> None:
     triage = subparsers.add_parser("triage", help="Triage an issue.")
     triage.add_argument("--issue")
     triage.add_argument("--issue-file")
+    triage.add_argument("--log-file", help="Optional failure log file to include in the issue context.")
 
     diagnose = subparsers.add_parser("diagnose-fix", help="Diagnose a project and propose a fix.")
     diagnose.add_argument("--project", default=".")
     diagnose.add_argument("--issue")
     diagnose.add_argument("--issue-file")
+    diagnose.add_argument("--log-file", help="Optional failure log file to include in the issue context.")
 
     both = subparsers.add_parser("run-both", help="Run issue triage, then diagnose and propose a fix.")
     both.add_argument("--project", default=".")
     both.add_argument("--issue")
     both.add_argument("--issue-file")
+    both.add_argument("--log-file", help="Optional failure log file to include in the issue context.")
 
     args = parser.parse_args()
     llm = get_llm(args.provider, args.model, args.temperature)
@@ -345,4 +356,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

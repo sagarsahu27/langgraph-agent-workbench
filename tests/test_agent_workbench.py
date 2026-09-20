@@ -8,6 +8,7 @@ from agent_workbench.main import (
     build_triage_graph,
     create_project_snapshot,
     get_llm,
+    read_issue,
     should_include,
 )
 
@@ -58,6 +59,21 @@ def test_snapshot_skips_common_dependency_dirs(tmp_path: Path):
 
     assert "README.md" in snapshot
     assert "node_modules" not in snapshot
+
+
+def test_read_issue_appends_failure_logs(tmp_path: Path):
+    issue_file = tmp_path / "issue.md"
+    issue_file.write_text("API returns 500", encoding="utf-8")
+    log_file = tmp_path / "failure.log"
+    log_file.write_text("ValueError: due_date is required", encoding="utf-8")
+
+    issue_text = read_issue(
+        SimpleNamespace(issue=None, issue_file=str(issue_file), log_file=str(log_file))
+    )
+
+    assert "API returns 500" in issue_text
+    assert "Failure logs:" in issue_text
+    assert "ValueError: due_date is required" in issue_text
 
 
 def test_should_include_supports_text_and_common_build_files(tmp_path: Path):

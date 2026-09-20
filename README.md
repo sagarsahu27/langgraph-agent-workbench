@@ -76,6 +76,12 @@ Run both agents in sequence:
 agent-workbench run-both --project C:\path\to\project --issue-file .\issue.txt
 ```
 
+Include failure logs in the issue context:
+
+```powershell
+agent-workbench run-both --project . --issue-file .\scenarios\issues\invoice-null-due-date.md --log-file .\scenarios\logs\invoice-null-due-date.log
+```
+
 You can also pass runtime settings directly:
 
 ```powershell

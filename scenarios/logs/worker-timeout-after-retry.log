@@ -1,0 +1,15 @@
+2026-09-21T02:44:32.003Z INFO  job_id=diag-9921 worker=diagnostic-scan message="job accepted" project_files=73
+2026-09-21T02:44:32.215Z INFO  job_id=diag-9921 step=collect_metadata attempt=1 endpoint=/internal/dependencies
+2026-09-21T02:44:42.219Z WARN  job_id=diag-9921 step=collect_metadata attempt=1 error="metadata endpoint timed out after 10000ms"
+2026-09-21T02:44:42.220Z INFO  job_id=diag-9921 step=collect_metadata attempt=2 retry_delay_ms=50
+2026-09-21T02:44:52.224Z WARN  job_id=diag-9921 step=collect_metadata attempt=2 error="metadata endpoint timed out after 10000ms"
+2026-09-21T02:44:52.225Z INFO  job_id=diag-9921 step=collect_metadata attempt=3 retry_delay_ms=50
+2026-09-21T02:45:02.231Z ERROR job_id=diag-9921 worker=diagnostic-scan message="retry budget exhausted" final_state=failed previous_state=running
+Traceback (most recent call last):
+  File "diagnostics/worker.py", line 119, in run_scan
+    metadata = dependency_client.collect(project_id)
+  File "diagnostics/dependency_client.py", line 58, in collect
+    return self.http.get("/internal/dependencies", timeout=10)
+TimeoutError: metadata endpoint timed out after 10000ms
+2026-09-21T02:45:02.235Z ERROR job_id=diag-9921 worker=diagnostic-scan message="job marked failed after duplicate terminal event" final_state=failed previous_state=failed
+
