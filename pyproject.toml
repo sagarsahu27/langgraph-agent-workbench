@@ -18,6 +18,8 @@ dev = [
 
 [project.scripts]
 agent-workbench = "agent_workbench.main:main"
+agent-workbench-issue = "agent_workbench.github_issue_agent:main"
+agent-workbench-pr-review = "agent_workbench.github_pr_agent:main"
 
 [build-system]
 requires = ["setuptools>=68"]

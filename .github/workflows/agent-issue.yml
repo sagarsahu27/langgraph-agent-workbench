@@ -1,0 +1,63 @@
+name: Agent issue analysis
+
+on:
+  issues:
+    types: [opened, edited, reopened, labeled]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Issue number to analyze
+        required: true
+        type: number
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: agent-issue-${{ github.event.issue.number || inputs.issue_number }}
+  cancel-in-progress: false
+
+jobs:
+  analyze-issue:
+    if: ${{ github.event_name == 'workflow_dispatch' || !github.event.issue.pull_request }}
+    runs-on: ubuntu-latest
+    env:
+      MODEL_PROVIDER: ${{ vars.MODEL_PROVIDER || 'openai' }}
+      MODEL_NAME: ${{ vars.MODEL_NAME || 'gpt-4o-mini' }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+      AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
+      AZURE_OPENAI_API_VERSION: ${{ vars.AZURE_OPENAI_API_VERSION || '2024-08-01-preview' }}
+      GH_TOKEN: ${{ github.token }}
+      ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue_number }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install agent workbench
+        run: python -m pip install -e .
+
+      - name: Configure git author
+        run: |
+          git config user.name "agent-workbench[bot]"
+          git config user.email "agent-workbench[bot]@users.noreply.github.com"
+
+      - name: Analyze issue and open draft fix-plan PR
+        run: |
+          python -m agent_workbench.github_issue_agent \
+            --repo "${{ github.repository }}" \
+            --issue-number "$ISSUE_NUMBER" \
+            --provider "$MODEL_PROVIDER" \
+            --model "$MODEL_NAME" \
+            --project . \
+            --create-pr
+

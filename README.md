@@ -94,4 +94,24 @@ agent-workbench triage --provider openai --model gpt-4o-mini --issue "Login fail
 pytest
 ```
 
+## GitHub Actions automation
+
+This repo includes two optional workflows:
+
+- **Agent issue analysis** runs when an issue is opened, edited, reopened, or labeled. It triages the issue, diagnoses the repository, writes an agent fix plan under `agent-output/issues/`, and opens a draft PR for maintainer review.
+- **Agent PR review** runs when a pull request is opened or updated. It reviews the diff and posts or updates a PR comment.
+
+Configure repository secrets/variables before enabling the workflows:
+
+```text
+OPENAI_API_KEY              # required when MODEL_PROVIDER=openai
+AZURE_OPENAI_API_KEY        # required when MODEL_PROVIDER=azure-openai
+AZURE_OPENAI_ENDPOINT       # required when MODEL_PROVIDER=azure-openai
+MODEL_PROVIDER              # repository variable: openai or azure-openai
+MODEL_NAME                  # repository variable: model name or Azure deployment
+AZURE_OPENAI_API_VERSION    # optional repository variable
+```
+
+The issue workflow intentionally creates a **draft PR with a fix plan**, not an unreviewed code patch. Convert the plan into code after review.
+
 The diagnostic agent is intentionally conservative: it reads project files and produces a plan, but it does not mutate the target project. Use its output as a reviewable patch plan before making changes.
