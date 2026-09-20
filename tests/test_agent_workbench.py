@@ -93,8 +93,12 @@ def test_get_llm_rejects_unknown_provider():
 
 def test_qwen3_disables_reasoning_by_default(monkeypatch):
     monkeypatch.delenv("OLLAMA_REASONING", raising=False)
+    monkeypatch.setenv("OLLAMA_NUM_CTX", "4096")
+    monkeypatch.setenv("OLLAMA_NUM_PREDICT", "512")
 
     model = get_llm("ollama", "qwen3:4b")
 
     assert model.model == "qwen3:4b"
     assert model.reasoning is False
+    assert model.num_ctx == 4096
+    assert model.num_predict == 512

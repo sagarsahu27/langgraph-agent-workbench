@@ -21,7 +21,7 @@ on:
       model_name:
         description: Ollama model, OpenAI model, or Azure deployment
         required: false
-        default: qwen3:4b
+        default: qwen3:1.7b
         type: string
 
 permissions:
@@ -40,9 +40,11 @@ jobs:
     timeout-minutes: 30
     env:
       MODEL_PROVIDER: ${{ inputs.model_provider || vars.MODEL_PROVIDER || 'ollama' }}
-      MODEL_NAME: ${{ inputs.model_name || vars.MODEL_NAME || 'qwen3:4b' }}
+      MODEL_NAME: ${{ inputs.model_name || vars.MODEL_NAME || 'qwen3:1.7b' }}
       OLLAMA_BASE_URL: http://127.0.0.1:11434
       OLLAMA_REASONING: ${{ vars.OLLAMA_REASONING || 'false' }}
+      OLLAMA_NUM_CTX: ${{ vars.OLLAMA_NUM_CTX || '8192' }}
+      OLLAMA_NUM_PREDICT: ${{ vars.OLLAMA_NUM_PREDICT || '768' }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
       AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}

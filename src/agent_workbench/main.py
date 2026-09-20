@@ -90,6 +90,8 @@ def get_llm(
             model=selected_model,
             base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
             reasoning=reasoning,
+            num_ctx=int(os.getenv("OLLAMA_NUM_CTX", "8192")),
+            num_predict=int(os.getenv("OLLAMA_NUM_PREDICT", "768")),
             temperature=temperature,
         )
 
@@ -163,7 +165,11 @@ def build_diagnostic_fix_graph(llm: ChatModel):
 
     def inspect_project(state: AgentState) -> AgentState:
         project_path = Path(state["project_path"]).resolve()
-        snapshot = create_project_snapshot(project_path)
+        snapshot = create_project_snapshot(
+            project_path,
+            max_files=int(os.getenv("PROJECT_SNAPSHOT_MAX_FILES", "80")),
+            max_chars=int(os.getenv("PROJECT_SNAPSHOT_MAX_CHARS", "24000")),
+        )
         return {"project_snapshot": snapshot}
 
     def diagnose_issue(state: AgentState) -> AgentState:

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-model="${MODEL_NAME:-qwen3:4b}"
+model="${MODEL_NAME:-qwen3:1.7b}"
 
 if ! command -v ollama >/dev/null 2>&1; then
   curl --fail --show-error --silent --location https://ollama.com/install.sh | sh
