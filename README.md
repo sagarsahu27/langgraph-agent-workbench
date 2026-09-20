@@ -18,7 +18,7 @@ Install Python 3.10 or newer.
 For local Qwen, install and start Ollama, then pull a model:
 
 ```powershell
-ollama pull qwen2.5-coder:7b
+ollama pull qwen3:4b
 ollama serve
 ```
 
@@ -36,7 +36,8 @@ Ollama with local Qwen:
 
 ```powershell
 $env:MODEL_PROVIDER = "ollama"
-$env:MODEL_NAME = "qwen2.5-coder:7b"
+$env:MODEL_NAME = "qwen3:4b"
+$env:OLLAMA_REASONING = "false"
 ```
 
 OpenAI:
@@ -112,17 +113,19 @@ MODEL_NAME                  # repository variable: Ollama model, OpenAI model, o
 AZURE_OPENAI_API_VERSION    # optional repository variable
 ```
 
-The workflows default to Ollama with `qwen2.5-coder:3b`, install Ollama on the GitHub-hosted runner, and pull the selected model before running an agent. No API secret is required for this default.
+The workflows default to Ollama with `qwen3:4b`, install Ollama on the GitHub-hosted runner, and pull the selected model before running an agent. Extended Qwen3 thinking is disabled by default to keep CI latency bounded. No API secret is required for this default.
 
 Recommended Qwen choices for GitHub-hosted runners:
 
 | Model | Use |
 |---|---|
-| `qwen2.5-coder:1.5b` | Fastest and lowest runner resource use |
-| `qwen2.5-coder:3b` | Default balance of speed and analysis quality |
-| `qwen2.5-coder:7b` | Better output but slower and more resource intensive |
+| `qwen3:1.7b` | Fastest Qwen3 option with low runner resource use |
+| `qwen3:4b` | Default balance of reasoning, code analysis, and runner compatibility |
+| `qwen2.5-coder:7b` | Code-specialized fallback, but slower and more resource intensive |
 
-Set `MODEL_PROVIDER=ollama` and change `MODEL_NAME` to select another locally hosted Qwen model. Pull time is incurred on each new GitHub-hosted runner.
+The official `qwen3-coder:30b` model is around 32 GB and is not suitable for a standard GitHub-hosted runner. Use it only with a sufficiently large self-hosted runner.
+
+Set `MODEL_PROVIDER=ollama` and change `MODEL_NAME` to select another locally hosted Qwen model. Manual workflow runs also expose provider and model inputs. Pull time is incurred on each new GitHub-hosted runner.
 
 The issue workflow intentionally creates a **draft PR with a fix plan**, not an unreviewed code patch. Convert the plan into code after review.
 

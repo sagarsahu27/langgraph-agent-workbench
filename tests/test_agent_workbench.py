@@ -89,3 +89,12 @@ def test_should_include_supports_text_and_common_build_files(tmp_path: Path):
 def test_get_llm_rejects_unknown_provider():
     with pytest.raises(ValueError, match="Unsupported provider"):
         get_llm("unknown-provider")
+
+
+def test_qwen3_disables_reasoning_by_default(monkeypatch):
+    monkeypatch.delenv("OLLAMA_REASONING", raising=False)
+
+    model = get_llm("ollama", "qwen3:4b")
+
+    assert model.model == "qwen3:4b"
+    assert model.reasoning is False

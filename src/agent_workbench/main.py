@@ -10,7 +10,7 @@ from langgraph.graph import END, StateGraph
 
 
 DEFAULT_PROVIDER = "ollama"
-DEFAULT_OLLAMA_MODEL = "qwen2.5-coder:7b"
+DEFAULT_OLLAMA_MODEL = "qwen3:4b"
 DEFAULT_OPENAI_MODEL = "gpt-4o-mini"
 DEFAULT_AZURE_OPENAI_API_VERSION = "2024-08-01-preview"
 
@@ -79,9 +79,17 @@ def get_llm(
     if selected_provider == "ollama":
         from langchain_ollama import ChatOllama
 
+        selected_model = model or os.getenv("MODEL_NAME") or os.getenv("QWEN_MODEL") or DEFAULT_OLLAMA_MODEL
+        reasoning_setting = os.getenv("OLLAMA_REASONING")
+        reasoning = (
+            reasoning_setting.lower() in {"1", "true", "yes", "on"}
+            if reasoning_setting is not None
+            else False if selected_model.startswith("qwen3") else None
+        )
         return ChatOllama(
-            model=model or os.getenv("MODEL_NAME") or os.getenv("QWEN_MODEL") or DEFAULT_OLLAMA_MODEL,
+            model=selected_model,
             base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
+            reasoning=reasoning,
             temperature=temperature,
         )
 

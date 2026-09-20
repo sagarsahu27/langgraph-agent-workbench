@@ -9,6 +9,20 @@ on:
         description: Issue number to analyze
         required: true
         type: number
+      model_provider:
+        description: Model provider
+        required: false
+        default: ollama
+        type: choice
+        options:
+          - ollama
+          - openai
+          - azure-openai
+      model_name:
+        description: Ollama model, OpenAI model, or Azure deployment
+        required: false
+        default: qwen3:4b
+        type: string
 
 permissions:
   contents: write
@@ -25,9 +39,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      MODEL_PROVIDER: ${{ vars.MODEL_PROVIDER || 'ollama' }}
-      MODEL_NAME: ${{ vars.MODEL_NAME || 'qwen2.5-coder:3b' }}
+      MODEL_PROVIDER: ${{ inputs.model_provider || vars.MODEL_PROVIDER || 'ollama' }}
+      MODEL_NAME: ${{ inputs.model_name || vars.MODEL_NAME || 'qwen3:4b' }}
       OLLAMA_BASE_URL: http://127.0.0.1:11434
+      OLLAMA_REASONING: ${{ vars.OLLAMA_REASONING || 'false' }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
       AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
