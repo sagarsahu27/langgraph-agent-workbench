@@ -7,7 +7,12 @@ from typing import Any
 
 
 def run_command(args: list[str], *, check: bool = True) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(args, check=check, capture_output=True, text=True)
+    result = subprocess.run(args, capture_output=True, text=True)
+    if check and result.returncode != 0:
+        command = " ".join(args)
+        details = result.stderr.strip() or result.stdout.strip() or "No command output."
+        raise RuntimeError(f"Command failed ({result.returncode}): {command}\n{details}")
+    return result
 
 
 def run_gh_json(args: list[str]) -> Any:
@@ -24,4 +29,3 @@ def run_gh_text(args: list[str]) -> str:
 def write_text_file(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
-

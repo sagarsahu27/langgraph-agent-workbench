@@ -1,3 +1,8 @@
+import sys
+
+import pytest
+
+from agent_workbench.github_common import run_command
 from agent_workbench.github_issue_agent import build_issue_context, build_issue_report, slugify
 from agent_workbench.github_pr_agent import COMMENT_MARKER, build_pr_review_prompt, format_review_comment
 
@@ -43,3 +48,7 @@ def test_pr_review_prompt_and_comment_marker():
     assert COMMENT_MARKER in comment
     assert "Looks good." in comment
 
+
+def test_run_command_includes_process_error_output():
+    with pytest.raises(RuntimeError, match="expected failure"):
+        run_command([sys.executable, "-c", "import sys; sys.stderr.write('expected failure'); sys.exit(2)"])
