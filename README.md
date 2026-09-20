@@ -1,0 +1,91 @@
+# LangGraph agent workbench
+
+This sample defines two LangGraph agents that can run on multiple model runtimes:
+
+1. **Issue triage agent** - classifies an issue, estimates severity and priority, suggests labels, identifies likely owner/component, and asks for missing reproduction details.
+2. **Diagnostic and fix agent** - inspects a target project, summarizes likely root causes, recommends focused checks, and drafts a safe fix plan or patch guidance.
+
+Supported runtimes:
+
+- **Ollama** for local models such as Qwen
+- **OpenAI API**
+- **Azure OpenAI**
+
+## Prerequisites
+
+Install Python 3.10 or newer.
+
+For local Qwen, install and start Ollama, then pull a model:
+
+```powershell
+ollama pull qwen2.5-coder:7b
+ollama serve
+```
+
+## Setup
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -e ".[dev]"
+```
+
+## Configure a runtime
+
+Ollama with local Qwen:
+
+```powershell
+$env:MODEL_PROVIDER = "ollama"
+$env:MODEL_NAME = "qwen2.5-coder:7b"
+```
+
+OpenAI:
+
+```powershell
+$env:MODEL_PROVIDER = "openai"
+$env:MODEL_NAME = "gpt-4o-mini"
+$env:OPENAI_API_KEY = "..."
+```
+
+Azure OpenAI:
+
+```powershell
+$env:MODEL_PROVIDER = "azure-openai"
+$env:MODEL_NAME = "your-azure-openai-deployment"
+$env:AZURE_OPENAI_ENDPOINT = "https://your-resource.openai.azure.com/"
+$env:AZURE_OPENAI_API_KEY = "..."
+```
+
+## Run the agents
+
+Triage an issue:
+
+```powershell
+agent-workbench triage --issue "The API returns 500 when creating an invoice without a due date."
+```
+
+Diagnose a project and produce a fix plan:
+
+```powershell
+agent-workbench diagnose-fix --project C:\path\to\project --issue "The API returns 500 when creating an invoice without a due date."
+```
+
+Run both agents in sequence:
+
+```powershell
+agent-workbench run-both --project C:\path\to\project --issue-file .\issue.txt
+```
+
+You can also pass runtime settings directly:
+
+```powershell
+agent-workbench triage --provider openai --model gpt-4o-mini --issue "Login fails after password reset."
+```
+
+## Test
+
+```powershell
+pytest
+```
+
+The diagnostic agent is intentionally conservative: it reads project files and produces a plan, but it does not mutate the target project. Use its output as a reviewable patch plan before making changes.
